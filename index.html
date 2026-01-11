@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ShardFlow Engine Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background: #050218;
+      color: #f6f4ff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 16px;
+    }
+    button {
+      margin: 4px 0;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(8,6,34,0.9);
+      color: #f6f4ff;
+      cursor: pointer;
+    }
+    #log {
+      margin-top: 12px;
+      max-height: 260px;
+      overflow-y: auto;
+      font-size: 12px;
+      background: rgba(8,6,34,0.9);
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(210,196,255,0.25);
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>ShardFlow Engine Demo</h1>
+  <p>This is a lightweight harness to test the shard engine. You will plug ShardFlow into your other apps.</p>
+
+  <div>
+    <button id="as-hub">Start as Hub</button>
+    <button id="as-client">Connect as Client</button>
+  </div>
+
+  <div style="margin-top:8px;">
+    <button id="send-ping">Broadcast Ping</button>
+    <button id="show-state">Show State</button>
+  </div>
+
+  <div id="log"></div>
+
+  <script src="shardflow.config.js"></script>
+  <script src="shardflow.core.js"></script>
+  <script src="shardflow.webrtc.js"></script>
+  <script src="shardflow.beacon.js"></script>
+  <script src="shardflow.api.js"></script>
+  <script>
+    const logEl = document.getElementById('log');
+    function logLine(text) {
+      logEl.textContent += text + "\n";
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    ShardFlow.init({
+      appId: "ShardFlowDemo",
+      appName: "ShardFlow Demo",
+      namespace: "SHARDFLOW_DEMO",
+      role: "client",
+      beaconEndpoints: {
+        // You will wire these to your actual JSON endpoints.
+        offerUrl:      "https://example.com/hub-offer.json",
+        answerUrl:     "https://example.com/hub-answers.json",
+        hubOfferUrl:   "https://example.com/hub-offer.json",
+        clientAnswerUrl:"https://example.com/hub-answers.json"
+      }
+    });
+
+    ShardFlow.onMessage((payload, from) => {
+      logLine(`[MSG] from ${from}: ${JSON.stringify(payload)}`);
+    });
+
+    ShardFlow.onPeerConnected(({ peerId }) => {
+      logLine(`[PEER CONNECTED] ${peerId}`);
+    });
+
+    ShardFlow.onPeerDisconnected(({ peerId }) => {
+      logLine(`[PEER DISCONNECTED] ${peerId}`);
+    });
+
+    document.getElementById('as-hub').onclick = async () => {
+      logLine("Starting as hub (super-peer)...");
+      try {
+        await ShardFlow.startHub();
+        logLine("Hub started. Publish offer JSON via your backend/beacon.");
+      } catch (e) {
+        logLine("Error starting hub: " + e.message);
+      }
+    };
+
+    document.getElementById('as-client').onclick = async () => {
+      logLine("Connecting as client...");
+      try {
+        await ShardFlow.connectToHub();
+        logLine("Client handshake done. Waiting for hub to complete connection.");
+      } catch (e) {
+        logLine("Error connecting as client: " + e.message);
+      }
+    };
+
+    document.getElementById('send-ping').onclick = () => {
+      ShardFlow.broadcast({ type: "ping", time: Date.now() });
+      logLine("Broadcasted ping to all peers.");
+    };
+
+    document.getElementById('show-state').onclick = () => {
+      const s = ShardFlow.getState();
+      logLine("[STATE] " + JSON.stringify(s, null, 2));
+    };
+  </script>
+</body>
+</html>
