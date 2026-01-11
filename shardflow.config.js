@@ -22,12 +22,9 @@ const ShardFlowConfig = {
   // Beacon endpoints are placeholders; you wire these to your site
   beaconEndpoints: {
     // Where this instance publishes its OFFER (when acting as hub)
-    offerUrl: null,   // e.g. "https://your-site.com/boardwalk-offer.json"
-    // Where this instance reads answers from (when acting as hub)
-    answerUrl: null,  // e.g. "https://your-site.com/boardwalk-answer.json"
-    // Where a joining client reads the hub’s offer from
-    hubOfferUrl: null,
-    // Where a joining client writes its answer to
-    clientAnswerUrl: null
+    offerUrl: 'https://boardwalkclay1.github.io/ShardFlowEngine/chat-hub-offer.json'
+    answerUrl: 'https://boardwalkclay1.github.io/ShardFlowEngine/chat-hub-answer.json'
+    hubOfferUrl: 'https://boardwalkclay1.github.io/ShardFlowEngine/chat-hub-offer.json'
+    clientAnswerUrl: 'https://boardwalkclay1.github.io/ShardFlowEngine/chat-hub-answer.json'
   }
 };
